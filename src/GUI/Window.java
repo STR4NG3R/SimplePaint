@@ -38,6 +38,9 @@ public class Window extends JFrame {
         FormsGUIList list = new FormsGUIList();
         setJMenuBar(drawer.menu.getBarra());
         
+        drawer.setListForms(list);
+        drawer.setOwner(this);
+        
         container.add(drawer.sp, BorderLayout.CENTER);
         container.add(drawer.coordScreen, BorderLayout.SOUTH);
         container.add(toolbar, BorderLayout.NORTH);

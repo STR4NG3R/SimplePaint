@@ -19,26 +19,20 @@ import Models.*;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.accessibility.Accessible;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 /**
  * <h1>This programs helps to draw in JPanel</h1>
@@ -58,6 +52,7 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
     boolean didPrint;
     MenuR menu;
     FreeMode free;
+    InputDialog in = new InputDialog();
 
     callBackDrawing cbDrawing = new callBackDrawing() {
         @Override
@@ -91,10 +86,11 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
     @Override
     public void paint(Graphics g) {
         super.paint(g); //To change body of generated methods, choose Tools | Templates.
-        Point [] coordsDrawer = new Point[2];
+        Point[] coordsDrawer = new Point[2];
         for (int i = 0; i < 2; i++) {
             coordsDrawer[i] = new Point(0, 0);
         }
+
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, getWidth(), getHeight());
@@ -108,6 +104,7 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setStroke(new BasicStroke(4));
+
         if (clickCounter == 1) {
             coordsDrawer[0].x = x;
             coordsDrawer[0].y = y;
@@ -117,7 +114,7 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
         } else if (ToolBar.typeSelected == 8) {
             paintForms(g, g2d, coordsDrawer, didPrint, "");
         }
-        
+
         clickCounter = 0;
         Color savedSelectedColor[];
         savedSelectedColor = new Color[2];
@@ -161,10 +158,10 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
         g2d.setColor(selectedColor[0]);
         switch (ToolBar.typeSelected) {
             case 0:
-                System.out.println("SELECTION");
+                list.add("SELECTION");
                 break;
             case 1:
-                System.out.println("OVAL");
+                list.add("OVAL");
                 newForm = new Circle(ToolBar.typeSelected, ToolBar.subtypeSelected,
                         coordsDrawer[0], coordsDrawer[1],
                         selectedColor[0], selectedColor[1]);
@@ -172,7 +169,7 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
                 GlobalListForms.listForms.add(newForm, i);
                 break;
             case 2:
-                System.out.println("RECTANGLE");
+                list.add("RECTANGLE");
                 newForm = new Square(ToolBar.typeSelected, ToolBar.subtypeSelected,
                         coordsDrawer[0], coordsDrawer[1],
                         selectedColor[0], selectedColor[1]);
@@ -180,10 +177,10 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
                 GlobalListForms.listForms.add(newForm, i);
                 break;
             case 3:
-                System.out.println("SQUARE");
+                list.add("SQUARE");
                 break;
             case 4:
-                System.out.println("ARROW");
+                list.add("ARROW");
                 newForm = new Arrow(ToolBar.typeSelected, ToolBar.subtypeSelected,
                         coordsDrawer[0], coordsDrawer[1],
                         selectedColor[0], selectedColor[1]);
@@ -192,7 +189,7 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
                 GlobalListForms.listForms.add(newForm, i);
                 break;
             case 5:
-                System.out.println("STAR");
+                list.add("STAR");
                 newForm = new Star(ToolBar.typeSelected, ToolBar.subtypeSelected,
                         coordsDrawer[0], coordsDrawer[1],
                         selectedColor[0], selectedColor[1]);
@@ -200,18 +197,17 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
                 GlobalListForms.listForms.add(newForm, i);
                 break;
             case 6:
-                System.out.println("TEXT");
                 if (i) {
-                    InputDialog in = new InputDialog();
-                    in.showDialog(xOnScreen, yOnScreen);
-                    System.out.println("before...");
-                    text = in.text;
+                    list.add("TEXT");
+                    in.showDialog(xOnScreen, yOnScreen, owner);
                     clickCounter = 0;
+                    text = in.text;
                 }
-                System.out.println(text);
+
                 if (text != null) {
                     switch (ToolBar.subtypeSelected) {
                         case 0:
+                            System.out.println("texted?" + text);
                             newForm = new Text(ToolBar.typeSelected, ToolBar.subtypeSelected,
                                     coordsDrawer[0], coordsDrawer[1],
                                     selectedColor[0], selectedColor[1],
@@ -223,11 +219,11 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
                 }
                 break;
             case 7:
-                System.out.println("IMAGE");
+                list.add("IMAGE");
                 break;
             case 8:
                 if (isDrawing) {
-                    System.out.println("FREE");
+                    list.add("FREE");
                     free.lineTo(coordScreen.getXs(), coordScreen.getYs());
                     g2d.draw(free);
                 } else {
@@ -243,7 +239,8 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
         height = getHeight() - height;
         setSize(new Dimension(width, height));
     }
-     public void setResolution(int width, int height) {
+
+    public void setResolution(int width, int height) {
         setPreferredSize(new Dimension(width, height));
     }
 
@@ -262,7 +259,7 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
         super.revalidate();
 
     }
-    
+
     int x, y, x1, y1;
     int xOnScreen, yOnScreen;
 
@@ -341,51 +338,52 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
                     "separador",
                     "About Me"
                 });
+
         JMenuItem me[] = menu.getItems();
         for (int i = 0; i < menu.getItems().length; i++) {
             if (me[i] != null) {
-                me[i].addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        Object event = e.getSource();
-                        if (event == me[0]) {
-                            JFileChooser fileC = new JFileChooser();
-                            fileC.showOpenDialog(null);
-                            Files.path = fileC.getSelectedFile().getPath();
-                            Files.leer();
-                        } else if (event == me[6]) {
-                            int i = JOptionPane.showConfirmDialog(null, "Are you sure to quit?", "Warning", JOptionPane.YES_NO_OPTION);
-                            if (i == 0) {
-                                System.exit(1);
-                            }
-                        } else if (event == me[3]) {//Save As
-                            String name;
+                me[i].addActionListener((ActionEvent e) -> {
+                    Object event = e.getSource();
+                    if (event == me[0]) {
+                        JFileChooser fileC = new JFileChooser();
+                        fileC.showOpenDialog(null);
+                        Files.path = fileC.getSelectedFile().getPath();
+                        Files.leer();
+                    } else if (event == me[6]) {
+                        int i1 = JOptionPane.showConfirmDialog(null, "Are you sure to quit?", "Warning", JOptionPane.YES_NO_OPTION);
+                        if (i1 == 0) {
+                            System.exit(1);
+                        }
+                    } else if (event == me[3]) {
+                        //Save As
+                        String name1;
+                        JFileChooser fileC = new JFileChooser();
+                        //name = fileC.get;
+                        fileC.showOpenDialog(null);
+                        Files.path = fileC.getCurrentDirectory().getPath();
+                        name1 = fileC.getSelectedFile().getName();
+                        Files.guardar(name1);
+                    } else if (event == me[1]) {
+                        //New
+                        GlobalListForms.listForms.clear();
+                        repaint();
+                    } else if (event == me[2]) {
+                        //Save
+                        if (Files.path == "") {
+                            String name2;
                             JFileChooser fileC = new JFileChooser();
                             //name = fileC.get;
                             fileC.showOpenDialog(null);
                             Files.path = fileC.getCurrentDirectory().getPath();
-                            name = fileC.getSelectedFile().getName();
-                            Files.guardar(name);
-                        } else if (event == me[1]) {//New
-                            GlobalListForms.listForms.clear();
-                            repaint();
-                        } else if (event == me[2]) {//Save
-                            if (Files.path == "") {
-                                String name;
-                                JFileChooser fileC = new JFileChooser();
-                                //name = fileC.get;
-                                fileC.showOpenDialog(null);
-                                Files.path = fileC.getCurrentDirectory().getPath();
-                                name = fileC.getSelectedFile().getName();
-                                Files.guardar(name);
-                            } else {
-                                Files.guardar();
-                            }
-                        } else if (event == me[5]) {//Properties
-
-                        } else if (event == me[8]) {//REFRESH
-                            repaint();
+                            name2 = fileC.getSelectedFile().getName();
+                            Files.guardar(name2);
+                        } else {
+                            Files.guardar();
                         }
+                    } else if (event == me[5]) {//Properties
+
+                    } else if (event == me[8]) {//REFRESH
+                        repaint();
                     }
                 });
             }
@@ -402,6 +400,16 @@ public class Drawer extends JPanel implements MouseListener, MouseMotionListener
             changeResolution(100, 100);
         }
     };
+    FormsGUIList list;
+
+    void setListForms(FormsGUIList _list) {
+        list = _list;
+    }
+    Window owner;
+
+    void setOwner(Window aThis) {
+        owner = aThis;
+    }
 }
 
 interface callBackDrawing {
@@ -486,65 +494,36 @@ class MenuR {
 
 }
 
-class InputDialog extends JDialog implements Accessible {
+class InputDialog {
 
     public String text;
 
-    public InputDialog() throws HeadlessException {
-    }
-    
-    public void showDialog(int x, int y) {
+    public void showDialog(int x, int y, JFrame owner) {
+        text = "";
+        JDialog dialog = new JDialog(owner);
 
-        /* Window w = new Window();
-        pane.setWantsInput(true);
-        pane.setSelectionValues(selectionValues);
-        pane.setInitialSelectionValue(initialSelectionValue);
-        pane.setComponentOrientation(((parentComponent == null) ?
-            getRootFrame() : parentComponent).getComponentOrientation());
+        dialog.setModal(true);
+        dialog.setLocation(x, y);
+        dialog.setMinimumSize(new Dimension(300, 100));
+        dialog.setUndecorated(true);
+        dialog.setAlwaysOnTop(true);
 
-        int style = styleFromMessageType(messageType);
-        JDialog dialog = pane.createDialog(parentComponent, title, style);
-
-        pane.selectInitialValue();
-        dialog.show();
-        dialog.dispose();
-
-        Object value = pane.getInputValue();
-
-        if (value == UNINITIALIZED_VALUE) {
-            return null;
-        }
-        return value;*/
         JPanel pane = new JPanel();
-        //setAlwaysOnTop(true);
-        setModal(true);
         JTextField textInput = new JTextField();
         JButton a = new JButton("OK");
-        //setTitle("Please Type");
         pane.setLayout(new BorderLayout());
         pane.add(new JLabel("Please Text Your Input"), BorderLayout.NORTH);
         pane.add(textInput, BorderLayout.CENTER);
-        pane.setLocation(x, y);
+        textInput.requestFocus();
         pane.add(a, BorderLayout.SOUTH);
-        text = "";
-        a.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                text = textInput.getText();
-                setModal(false);
-                dispose();
-            }
+
+        a.addActionListener(e -> {
+            text = textInput.getText();
+            dialog.setModal(false);
+            dialog.dispose();
         });
-        
-        getContentPane().add(pane);
-        setLocation(x, y);
-        setMinimumSize(new Dimension(300,100));
-        setAlwaysOnTop(true);
-        setUndecorated(true);
-        setVisible(true);
-        
-        //setUndecorated(true);
-        //setMinimumSize(new Dimension(200, 150));
-        //setVisible(true);
+
+        dialog.setContentPane(pane);
+        dialog.setVisible(true);
     }
 }
